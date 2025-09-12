@@ -37,6 +37,11 @@ public:
 		node(private_node* node = nullptr) noexcept
 			: m_node(node) {}
 
+		bool operator==(const node& other) const noexcept
+		{
+			return m_node == other.m_node;
+		}
+
 		/**
 		 * @brief Retrieves the left child of the current node.
 		 * @return The left child node, or a null node if the current node has no left child.
@@ -85,6 +90,51 @@ public:
 		{
 			return const_cast<T&>(static_cast<const general_tree<T>::node&>(*this).data());
 		}
+
+		/*
+		* @brief Checks if the node is the root of the tree.
+		* @return true if the node is the root, false otherwise.
+		*/
+		bool is_root() const noexcept
+		{
+			return m_node->m_parent == nullptr;
+		}
+
+		/**
+		 * @brief Checks if the node is a leaf in the tree.
+		 * @return true if the node is a leaf, false otherwise.
+		 */
+		bool is_leaf() const noexcept
+		{
+			return m_node->m_left_child == nullptr;
+		}
+
+		/**
+		 * @brief Checks if the node has a right sibling.
+		 * @return true if the node has a right sibling, false otherwise.
+		 */
+		bool has_right_sibling() const noexcept
+		{
+			return m_node->m_right_sibling != nullptr;
+		}
+
+		/**
+		 * @brief Checks if the node has a left child.
+		 * @return true if the node has a left child, false otherwise.
+		 */
+		bool has_left_child() const noexcept
+		{
+			return m_node->m_left_child != nullptr;
+		}
+
+		/**
+		 * @brief Checks if the node is null.
+		 * @return true if the node is null, false otherwise.
+		 */
+		bool is_null() const noexcept
+		{
+			return m_node == nullptr;
+		}
 	};
 
 	general_tree() noexcept : m_root(nullptr) {}
@@ -93,6 +143,34 @@ public:
 	general_tree(U&& root_value) : general_tree()
 	{
 		m_root = new private_node(std::forward<U>(root_value));
+	}
+
+	/**
+	 * @brief Creates and emplaces the root node of the tree with the given arguments.
+	 * @tparam Args Variadic template parameters representing the types of arguments to be forwarded to the root node constructor.
+	 * @param args Arguments to forward to the root node constructor.
+	 * @return node A handle to the newly created root node.
+	 * @throws std::runtime_error If a root node already exists.
+	*/
+	template<typename ...Args>
+	node emplace_root(Args&& ...args)
+	{
+		if (m_root != nullptr)
+			throw std::runtime_error("Root already exists");
+		m_root = new private_node(std::forward<Args>(args)...);
+		return m_root;
+	}
+
+	/**
+	 * @brief Creates the root node of the tree
+	 * @param data The value to store in the root node.
+	 * @return node A handle to the newly created root node.
+	 * @throws std::runtime_error If a root node already exists.
+	 */
+	template<typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
+	node create_root(U&& data)
+	{
+		return emplace_root(std::forward<U>(data));
 	}
 
 	/**
@@ -118,11 +196,11 @@ public:
 	}
 
 	/**
-	* @brief Inserts a new left child node for the given destination node, with the provided value.
-	* @param destiny The node to which the left child will be inserted.
-	* @param new_node_value The value to store in the newly created left child node.
-	* @return node A handle to the newly created left child node.
-	* @throws std::invalid_argument If the destination node is null.
+	 * @brief Inserts a new left child node for the given destination node, with the provided value.
+	 * @param destiny The node to which the left child will be inserted.
+	 * @param new_node_value The value to store in the newly created left child node.
+	 * @return node A handle to the newly created left child node.
+	 * @throws std::invalid_argument If the destination node is null.
 	*/
 	template<typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
 	node insert_left_child(node destiny, U&& new_node_value)
@@ -139,8 +217,8 @@ public:
 	}
 
 	/**
-	* @brief Checks whether the tree is empty.
-	*/
+	 * @brief Checks whether the tree is empty.
+	 */
 	bool empty() const noexcept
 	{
 		return m_root == nullptr;
