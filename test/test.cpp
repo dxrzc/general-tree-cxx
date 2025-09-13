@@ -273,3 +273,86 @@ TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
 		REQUIRE_EQ(node, inserted_tree_root);
 	}
 }
+
+TEST_SUITE("general_tree::emplace_right_sibling(node, ...args)")
+{
+	TEST_CASE_FIXTURE(CounterFixture, "data is constructed inside node with no copies")
+	{
+		general_tree<Counter> tree{ Counter() };
+		tree.insert_left_child(tree.root(), Counter());
+		Counter::reset();
+
+		auto node = tree.emplace_right_sibling(tree.root().left_child(), "string", 0);
+
+		CHECK_EQ(Counter::copy_constructor_calls, 0);
+		CHECK_EQ(node.data().get_int(), 0);
+		CHECK_EQ(node.data().get_string(), "string");
+	}	
+}
+
+TEST_SUITE("general_tree::insert_right_sibling(node, data)")
+{
+	TEST_CASE_FIXTURE(CounterFixture, "do not make copies when data is an rvalue")
+	{
+		general_tree<Counter> tree(Counter{});
+		auto destiny_node = tree.insert_left_child(tree.root(), Counter{});
+		Counter c;
+		Counter::reset();
+		auto node = tree.insert_right_sibling(destiny_node, std::move(c));
+
+		CHECK_EQ(Counter::copy_constructor_calls, 0);
+		CHECK_EQ(Counter::move_constructor_calls, 1);
+	}
+
+	TEST_CASE("created node should be the destiny node right sibling")
+	{
+		general_tree<int> tree(1);
+		auto destiny_node = tree.insert_left_child(tree.root(), 2);
+
+		auto node = tree.insert_right_sibling(destiny_node, 3);
+		REQUIRE_EQ(destiny_node.right_sibling(), node);
+	}
+
+	TEST_CASE("destiny node parent should be the parent of the created node")
+	{
+		general_tree<int> tree(1);
+		auto destiny_node = tree.insert_left_child(tree.root(), 2);
+
+		auto node = tree.insert_right_sibling(destiny_node, 3);
+		REQUIRE_EQ(node.parent(), destiny_node.parent());
+	}
+
+	TEST_CASE("can not be inserted to root")
+	{
+		general_tree<int> tree(1);
+		auto root = tree.root();
+
+		REQUIRE_THROWS_AS(tree.insert_right_sibling(root, 2), std::invalid_argument);
+	}
+
+	TEST_CASE("return the inserted node")
+	{
+		general_tree<int> tree(1);
+		auto destiny_node = tree.insert_left_child(tree.root(), 2);
+
+		auto node = tree.insert_right_sibling(destiny_node, 3);
+		REQUIRE_EQ(node.data(), 3);
+	}
+
+	TEST_CASE("throw invalid argument if destiny node is null")
+	{
+		general_tree<int> tree(1);
+		auto null_node = tree.root().left_child();
+		REQUIRE(null_node.is_null());
+
+		REQUIRE_THROWS_AS(tree.insert_right_sibling(null_node, 2), std::invalid_argument);
+	}
+
+	TEST_CASE("throw invalid argument if destiny node is a root")
+	{
+		general_tree<int> tree(1);
+		auto root = tree.root();
+
+		REQUIRE_THROWS_AS(tree.insert_right_sibling(root, 2), std::invalid_argument);
+	}
+}
