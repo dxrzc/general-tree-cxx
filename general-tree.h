@@ -238,6 +238,37 @@ public:
 	}
 
 	/**
+	 * @brief Inserts an entire subtree as the right sibling of the given destination node.
+	 * @param destiny The node to which the tree will be inserted as a right sibling.
+	 * @param tree The tree to insert as a right sibling. After insertion, this tree will be empty.
+	 * @return node A handle to the newly inserted right sibling node, or a null node if the tree is empty.
+	 * @throws std::invalid_argument If the destination node is null, is the root (cannot have siblings),
+	 *                               or if attempting to insert the tree as its own sibling.
+	 */
+	node insert_right_sibling(node destiny, general_tree<T>& tree)
+	{
+		if (destiny.m_node == nullptr)
+			throw std::invalid_argument("Cannot insert right sibling to null node");
+
+		if (destiny.m_node->m_parent == nullptr)
+			throw std::invalid_argument("Cannot insert right sibling to root");
+
+		if (destiny.m_node == tree.m_root)
+			throw std::invalid_argument("Cannot insert a tree as its own sibling");
+
+		if (tree.m_root)
+		{
+			tree.m_root->m_parent = destiny.m_node->m_parent;
+			tree.m_root->m_right_sibling = destiny.m_node->m_right_sibling;
+			destiny.m_node->m_right_sibling = tree.m_root;
+			tree.m_root = nullptr;
+			return destiny.m_node->m_right_sibling;
+		}
+
+		return node(nullptr);
+	}
+
+	/**
 	 * @brief Returns the root node of the tree.
 	 */
 	[[nodiscard]] node root() const noexcept
