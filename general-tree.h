@@ -160,6 +160,24 @@ public:
 
 			return child;
 		}
+
+		/**
+		 * @brief Counts the number of children of the current node.
+		 * @return The total number of children of the current node.
+		 * @throws std::invalid_argument If the current node is null.
+		*/
+		[[nodiscard]] std::size_t children_count() const
+		{
+			if (m_node == nullptr)
+				throw std::invalid_argument("Cannot count children of null node");
+
+			std::size_t count = 0;
+			for (const private_node* child = m_node->m_left_child; child != nullptr; child = child->m_right_sibling)
+				++count;
+
+			return count;
+		}
+
 	};
 
 	general_tree() noexcept : m_root(nullptr) {}
