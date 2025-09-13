@@ -269,6 +269,30 @@ public:
 	}
 
 	/**
+	 * @brief Creates and emplaces a new right sibling for the given destination node.
+	 * @tparam Args Variadic template parameters for the new node constructor.
+	 * @param destiny The node to which the new right sibling will be attached.
+	 * @param args Arguments to forward to the new node's constructor.
+	 * @return node A handle to the newly created right sibling node.
+	 * @throws std::invalid_argument If the destination node is null or is the root (cannot have a sibling).
+	*/
+	template<typename ...Args>
+	node emplace_right_sibling(node destiny, Args&& ...args)
+	{
+		if (destiny.m_node == nullptr)
+			throw std::invalid_argument("Cannot insert right sibling to null node");
+
+		if (destiny.m_node->m_parent == nullptr)
+			throw std::invalid_argument("Cannot insert right sibling to root");
+
+		private_node* new_node = new private_node(std::forward<Args>(args)...);
+		new_node->m_parent = destiny.m_node->m_parent;
+		new_node->m_right_sibling = destiny.m_node->m_right_sibling;
+		destiny.m_node->m_right_sibling = new_node;
+		return new_node;
+	}
+
+	/**
 	 * @brief Returns the root node of the tree.
 	 */
 	[[nodiscard]] node root() const noexcept
