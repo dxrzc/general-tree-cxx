@@ -5,7 +5,7 @@
 #include "doctest.h"
 
 TEST_SUITE("general_tree::node")
-{	
+{
 	TEST_CASE("right sibling, parent and left child are null by default")
 	{
 		general_tree<int> tree(1);
@@ -103,10 +103,31 @@ TEST_SUITE("general_tree::node")
 		general_tree<int> tree(42);
 		REQUIRE_EQ(tree.root().depth(), 0);
 	}
+
+	TEST_CASE("node::descendants_count() - throw invalid argument if node is null")
+	{
+		general_tree<int> tree;
+		CHECK_THROWS_AS(tree.root().descendants_count(), std::invalid_argument);
+	}
+
+	TEST_CASE("node::descendants_count() - return the number of descendants")
+	{
+		general_tree<int> tree(1);
+		auto root = tree.root();
+		auto child1 = tree.insert_left_child(root, 2); // 1
+		auto child2 = tree.insert_right_sibling(child1, 3); // 2
+		auto grandchild1 = tree.insert_left_child(child1, 4); // 3
+		auto grandchild2 = tree.insert_right_sibling(grandchild1, 5); // 4
+		tree.insert_left_child(child2, 6); // 5
+
+		REQUIRE_EQ(root.descendants_count(), 5);
+		REQUIRE_EQ(child1.descendants_count(), 2);
+		REQUIRE_EQ(grandchild1.descendants_count(), 0);
+	}
 }
 
 TEST_SUITE("general_tree::create_root(data)")
-{	
+{
 	TEST_CASE("throw runtime error if root already exists")
 	{
 		general_tree<int> empty_tree;
@@ -144,7 +165,7 @@ TEST_SUITE("general_tree::emplace_root(...args)")
 }
 
 TEST_SUITE("general_tree:insert_left_child(node, data)")
-{	
+{
 	TEST_CASE_FIXTURE(CounterFixture, "do not create copies when data is an rvalue")
 	{
 		general_tree<Counter> counter_tree{ Counter() };
@@ -188,7 +209,7 @@ TEST_SUITE("general_tree:insert_left_child(node, data)")
 }
 
 TEST_SUITE("general_tree::insert_left_child(node, tree)")
-{	
+{
 	TEST_CASE("destiny node is now the parent of the inserted tree")
 	{
 		general_tree<int> tree(1);
@@ -287,7 +308,7 @@ TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
 	TEST_CASE("return null node if tree is empty")
 	{
 		general_tree<int> tree(1);
-		tree.insert_left_child(tree.root(),  2);
+		tree.insert_left_child(tree.root(), 2);
 
 		general_tree<int> empty_tree;
 		auto node = tree.insert_right_sibling(tree.root().left_child(), empty_tree);
@@ -313,12 +334,12 @@ TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
 		general_tree<int> tree(1);
 		auto destiny_node = tree.insert_left_child(tree.root(), 2);
 
-		general_tree<int> new_tree(2);		
+		general_tree<int> new_tree(2);
 		auto inserted_tree_root = new_tree.root();
 
 		tree.insert_right_sibling(destiny_node, new_tree);
 		REQUIRE_EQ(destiny_node.right_sibling(), inserted_tree_root);
-	}	
+	}
 
 	TEST_CASE("destiny node parent is now the parent of the inserted tree")
 	{
@@ -359,7 +380,7 @@ TEST_SUITE("general_tree::emplace_right_sibling(node, ...args)")
 		CHECK_EQ(Counter::copy_constructor_calls, 0);
 		CHECK_EQ(node.data().get_int(), 0);
 		CHECK_EQ(node.data().get_string(), "string");
-	}	
+	}
 }
 
 TEST_SUITE("general_tree::insert_right_sibling(node, data)")
