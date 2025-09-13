@@ -293,6 +293,19 @@ public:
 	}
 
 	/**
+	 * @brief Inserts a new right sibling node for the given destination node, with the provided value.
+	 * @param destiny The node to which the right sibling will be inserted.
+	 * @param new_node_value The value to store in the newly created right sibling node.
+	 * @return node A handle to the newly created right sibling node.
+	 * @throws std::invalid_argument If the destination node is null or is the root (cannot have a sibling).
+	*/
+	template<typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
+	node insert_right_sibling(node destiny, U&& new_node_value)
+	{
+		return emplace_right_sibling(destiny, std::forward<U>(new_node_value));
+	}
+
+	/**
 	 * @brief Returns the root node of the tree.
 	 */
 	[[nodiscard]] node root() const noexcept
