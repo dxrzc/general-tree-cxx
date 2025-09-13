@@ -12,3 +12,4 @@
 #define TEST_SUITE(decorators) DOCTEST_TEST_SUITE(decorators)
 #define TEST_CASE_FIXTURE(x, name) DOCTEST_TEST_CASE_FIXTURE(x, name)
 #define CHECK_THROWS_AS(expr, __VA_ARGS__) DOCTEST_CHECK_THROWS_AS(expr, __VA_ARGS__)
+#define SUBCASE(name) DOCTEST_SUBCASE(name)
