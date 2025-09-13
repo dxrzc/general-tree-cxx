@@ -3,3 +3,11 @@
 // For more information see https://go.microsoft.com/fwlink/?linkid=865984
 #define CHECK(__VA_ARGS__) DOCTEST_CHECK(__VA_ARGS__)
 #define TEST_CASE(name) DOCTEST_TEST_CASE(name)
+#define CHECK_EQ(__VA_ARGS__) DOCTEST_CHECK_EQ(__VA_ARGS__)
+#define REQUIRE_THROWS_AS(expr, __VA_ARGS__) DOCTEST_REQUIRE_THROWS_AS(expr, __VA_ARGS__)
+#define REQUIRE(__VA_ARGS__) DOCTEST_REQUIRE(__VA_ARGS__)
+#define REQUIRE_FALSE(__VA_ARGS__) DOCTEST_REQUIRE_FALSE(__VA_ARGS__)
+#define REQUIRE_EQ(__VA_ARGS__) DOCTEST_REQUIRE_EQ(__VA_ARGS__)
+#define REQUIRE_NE(__VA_ARGS__) DOCTEST_REQUIRE_NE(__VA_ARGS__)
+#define TEST_SUITE(decorators) DOCTEST_TEST_SUITE(decorators)
+#define TEST_CASE_FIXTURE(x, name) DOCTEST_TEST_CASE_FIXTURE(x, name)
