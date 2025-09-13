@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <utility>
+#include <queue>
 
 template<typename T>
 class general_tree
