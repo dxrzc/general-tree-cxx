@@ -57,7 +57,7 @@ TEST_SUITE("general_tree::node")
 		REQUIRE(child0.is_null());
 	}
 
-	TEST_CASE("node::children_count - throw invalid argument if node is null")
+	TEST_CASE("node::children_count() - throw invalid argument if node is null")
 	{
 		general_tree<int> tree;
 		CHECK_THROWS_AS(tree.root().children_count(), std::invalid_argument);
@@ -69,7 +69,7 @@ TEST_SUITE("general_tree::node")
 		REQUIRE_EQ(tree.root().children_count(), 0);
 	}
 
-	TEST_CASE("node::children_count - return the number of children")
+	TEST_CASE("node::children_count() - return the number of children")
 	{
 		general_tree<int> tree(1);
 		auto root = tree.root();
@@ -81,7 +81,7 @@ TEST_SUITE("general_tree::node")
 		REQUIRE_EQ(root.children_count(), 3);
 	}
 
-	TEST_CASE("node::depth - return the depth of the current node")
+	TEST_CASE("node::depth() - return the depth of the current node")
 	{
 		general_tree<int> tree(1);
 		auto root = tree.root();
@@ -92,13 +92,13 @@ TEST_SUITE("general_tree::node")
 		REQUIRE_EQ(grandchild.depth(), 2);
 	}
 
-	TEST_CASE("node::depth - throw invalid argument if node is null")
+	TEST_CASE("node::depth() - throw invalid argument if node is null")
 	{
 		general_tree<int> tree;
 		CHECK_THROWS_AS(tree.root().depth(), std::invalid_argument);
 	}
 
-	TEST_CASE("node::depth - return 0 for root node")
+	TEST_CASE("node::depth() - return 0 for root node")
 	{
 		general_tree<int> tree(42);
 		REQUIRE_EQ(tree.root().depth(), 0);

@@ -199,6 +199,35 @@ public:
 
 			return depth;
 		}
+
+		/**
+		 * @brief Computes the total number of descendants of the current node.
+		 * @return The total number of descendants of the current node.
+		 * @throws std::invalid_argument If the current node is null.
+		*/
+		[[nodiscard]] std::size_t descendants_count() const
+		{
+			if (m_node == nullptr)
+				throw std::invalid_argument("Cannot get height of null node");
+
+			std::size_t count = 0;
+			std::queue<private_node*> q;
+			q.push(m_node);
+
+			while (!q.empty())
+			{
+				private_node* current_node = q.front();
+				q.pop();
+
+				for (private_node* left_child = current_node->m_left_child; left_child != nullptr; left_child = left_child->m_right_sibling)
+				{
+					q.push(left_child);
+					++count;
+				}
+			}
+
+			return count;
+		}
 	};
 
 	general_tree() noexcept : m_root(nullptr) {}
