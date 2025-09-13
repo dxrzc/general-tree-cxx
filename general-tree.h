@@ -137,6 +137,29 @@ public:
 		{
 			return m_node == nullptr;
 		}
+
+	    /**
+		  * @brief Retrieves the child node at the specified index.
+		  * @param index The zero-based index of the child to retrieve.
+		  * @return The child node at the specified index, or a null node if the index is out of range.
+		  * @throws std::invalid_argument If the current node is null.
+		 */
+		[[nodiscard]] node child(std::size_t index) const
+		{
+			if (m_node == nullptr)
+				throw std::invalid_argument("Cannot get child of null node");
+
+			node child = m_node->m_left_child;
+
+			for (std::size_t i = 0; i < index; i++)
+			{
+				if (child.m_node == nullptr)
+					return nullptr;
+				child = child.m_node->m_right_sibling;
+			}
+
+			return child;
+		}
 	};
 
 	general_tree() noexcept : m_root(nullptr) {}
