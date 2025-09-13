@@ -31,6 +31,31 @@ TEST_SUITE("general_tree::node")
 		general_tree<int> tree;
 		CHECK_THROWS_AS(tree.root().data(), std::invalid_argument);
 	}
+
+	TEST_CASE("node::child(index) - throw invalid argument if node null")
+	{
+		general_tree<int> tree;
+		CHECK_THROWS_AS(tree.root().child(2), std::invalid_argument);
+	}
+
+	TEST_CASE("node::child(index) - return the requested child")
+	{
+		general_tree<int> tree(1);
+		auto left = tree.insert_left_child(tree.root(), 2);
+		auto right = tree.insert_right_sibling(left, 3);
+
+		REQUIRE_EQ(tree.root().child(0), left);
+		REQUIRE_EQ(tree.root().child(1), right);
+	}
+
+	TEST_CASE("node::child(index) - return null node when node has no children")
+	{
+		general_tree<int> tree(1);
+		auto root = tree.root();
+
+		auto child0 = root.child(0);
+		REQUIRE(child0.is_null());
+	}
 }
 
 TEST_SUITE("general_tree::create_root(data)")
