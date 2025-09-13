@@ -80,6 +80,29 @@ TEST_SUITE("general_tree::node")
 
 		REQUIRE_EQ(root.children_count(), 3);
 	}
+
+	TEST_CASE("node::depth - return the depth of the current node")
+	{
+		general_tree<int> tree(1);
+		auto root = tree.root();
+		auto child = tree.insert_left_child(root, 2);
+		auto grandchild = tree.insert_left_child(child, 3);
+
+		REQUIRE_EQ(child.depth(), 1);
+		REQUIRE_EQ(grandchild.depth(), 2);
+	}
+
+	TEST_CASE("node::depth - throw invalid argument if node is null")
+	{
+		general_tree<int> tree;
+		CHECK_THROWS_AS(tree.root().depth(), std::invalid_argument);
+	}
+
+	TEST_CASE("node::depth - return 0 for root node")
+	{
+		general_tree<int> tree(42);
+		REQUIRE_EQ(tree.root().depth(), 0);
+	}
 }
 
 TEST_SUITE("general_tree::create_root(data)")
