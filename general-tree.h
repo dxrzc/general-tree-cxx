@@ -1,4 +1,6 @@
-﻿#include <stdexcept>
+﻿#pragma once
+
+#include <stdexcept>
 #include <utility>
 
 template<typename T>
@@ -206,6 +208,33 @@ public:
 	node insert_left_child(node destiny, U&& new_node_value)
 	{
 		return emplace_left_child(destiny, std::forward<U>(new_node_value));
+	}
+
+	/**
+	 * @brief Inserts an entire subtree as the left child of the given destination node.
+	 * @param destiny The node to which the tree will be inserted as a left child.
+	 * @param tree The tree to insert as a left child. After insertion, this tree will be empty.
+	 * @return node A handle to the newly inserted left child node, or a null node if the tree is empty.
+	 * @throws std::invalid_argument If the destination node is null or if attempting to insert the tree as a child of its own root.
+    */
+	node insert_left_child(node destiny, general_tree<T>& tree)
+	{
+		if (!destiny.m_node)
+			throw std::invalid_argument("Cannot insert left child to null node");
+
+		if (destiny.m_node == tree.m_root)
+			throw std::invalid_argument("Cannot insert a tree as its own child");
+
+		if (tree.m_root)
+		{
+			tree.m_root->m_parent = destiny.m_node;
+			tree.m_root->m_right_sibling = destiny.m_node->m_left_child;
+			destiny.m_node->m_left_child = tree.m_root;
+			tree.m_root = nullptr;
+			return destiny.m_node->m_left_child;
+		}
+
+		return node(nullptr);
 	}
 
 	/**
