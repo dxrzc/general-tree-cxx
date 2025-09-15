@@ -464,4 +464,10 @@ public:
 		delete_from_node(m_root);
 		m_root = nullptr;
 	}
+
+	void delete_left_child(node n)
+	{
+		// TODO: check null node
+		delete_from_node(n.m_node->m_left_child);
+	}
 };
