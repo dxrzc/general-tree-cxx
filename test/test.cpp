@@ -176,6 +176,7 @@ TEST_SUITE("general_tree::emplace_root(...args)")
 		counters.emplace_root("string", 0);
 		CHECK_EQ(counters.root().data().get_int(), 0);
 		CHECK_EQ(counters.root().data().get_string(), "string");
+		REQUIRE_EQ(Counter::copy_constructor_calls, 0);
 	}
 }
 
