@@ -1,3 +1,4 @@
+#define DOCTEST_CONFIG_VOID_CAST_EXPRESSIONS
 #include "utils/fixtures/counter.fixture.h"
 #include "general-tree.h"
 #include "doctest.h"
