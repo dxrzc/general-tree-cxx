@@ -4,7 +4,7 @@
 #include "general-tree.h"
 #include "doctest.h"
 
-TEST_SUITE("general_tree::constructors")
+TEST_SUITE("general_tree::general_tree(general_tree&&)")
 {
 	TEST_CASE_FIXTURE(CounterFixture, "do not make any copies or movements")
 	{
