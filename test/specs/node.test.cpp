@@ -1,7 +1,6 @@
 #define DOCTEST_CONFIG_VOID_CAST_EXPRESSIONS
 #include "doctest.h"
 #include "general-tree.h"
-#include "utils/fixtures/counter.fixture.h"
 
 TEST_SUITE("general_tree::node")
 {
