@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+#include <string>
 #include <utility>
 
 class Counter
@@ -26,22 +26,19 @@ public:
 
     Counter() = default;
 
-    Counter(const std::string& string, int integer)
-        : m_string(string), m_int(integer) {}
+    Counter(const std::string &string, int integer) : m_string(string), m_int(integer) {}
 
-    Counter(const Counter& rhs)
-        : m_string(rhs.m_string), m_int(rhs.m_int)
+    Counter(const Counter &rhs) : m_string(rhs.m_string), m_int(rhs.m_int)
     {
         ++copy_constructor_calls;
     }
 
-    Counter(Counter&& rhs) noexcept
-        : m_string(std::move(rhs.m_string)), m_int(rhs.m_int)
+    Counter(Counter &&rhs) noexcept : m_string(std::move(rhs.m_string)), m_int(rhs.m_int)
     {
         ++move_constructor_calls;
     }
 
-    Counter& operator=(const Counter& rhs)
+    Counter &operator=(const Counter &rhs)
     {
         if (this != &rhs)
         {
@@ -52,7 +49,7 @@ public:
         return *this;
     }
 
-    Counter& operator=(Counter&& rhs) noexcept
+    Counter &operator=(Counter &&rhs) noexcept
     {
         if (this != &rhs)
         {
@@ -68,13 +65,22 @@ public:
         ++destructor_calls;
     }
 
-    [[nodiscard]] const std::string& get_string() const noexcept { return m_string; }
-    [[nodiscard]] int get_int() const noexcept { return m_int; }
-};
+    [[nodiscard]] const std::string &get_string() const noexcept
+    {
+        return m_string;
+    }
 
+    [[nodiscard]] int get_int() const noexcept
+    {
+        return m_int;
+    }
+};
 
 struct CounterFixture
 {
-	CounterFixture() { Counter::reset(); }
-	~CounterFixture() = default;
+    CounterFixture()
+    {
+        Counter::reset();
+    }
+    ~CounterFixture() = default;
 };
