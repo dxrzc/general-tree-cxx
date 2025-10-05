@@ -1,4 +1,6 @@
 out/
 CMakePresets.json
 .vs
-build
+.vscode
+build 
+.cache
