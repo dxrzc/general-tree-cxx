@@ -18,8 +18,7 @@ private:
         template <typename... Args>
         private_node(Args &&...args)
             : m_right_sibling(nullptr), m_left_child(nullptr), m_parent(nullptr), m_data(std::forward<Args>(args)...)
-        {
-        }
+        {}
     };
 
     private_node *m_root;
