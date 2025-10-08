@@ -26,14 +26,21 @@ public:
 
     Counter() = default;
 
-    Counter(const std::string &string, int integer) : m_string(string), m_int(integer) {}
+    Counter(const std::string &string, int integer)
+        : m_string(string),
+          m_int(integer)
+    {}
 
-    Counter(const Counter &rhs) : m_string(rhs.m_string), m_int(rhs.m_int)
+    Counter(const Counter &rhs)
+        : m_string(rhs.m_string),
+          m_int(rhs.m_int)
     {
         ++copy_constructor_calls;
     }
 
-    Counter(Counter &&rhs) noexcept : m_string(std::move(rhs.m_string)), m_int(rhs.m_int)
+    Counter(Counter &&rhs) noexcept
+        : m_string(std::move(rhs.m_string)),
+          m_int(rhs.m_int)
     {
         ++move_constructor_calls;
     }

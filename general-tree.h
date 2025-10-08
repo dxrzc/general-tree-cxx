@@ -17,7 +17,10 @@ private:
 
         template <typename... Args>
         private_node(Args &&...args)
-            : m_right_sibling(nullptr), m_left_child(nullptr), m_parent(nullptr), m_data(std::forward<Args>(args)...)
+            : m_right_sibling(nullptr),
+              m_left_child(nullptr),
+              m_parent(nullptr),
+              m_data(std::forward<Args>(args)...)
         {}
     };
 
@@ -75,7 +78,9 @@ public:
         friend class general_tree;
 
     public:
-        node(private_node *node = nullptr) noexcept : m_node(node) {}
+        node(private_node *node = nullptr) noexcept
+            : m_node(node)
+        {}
 
         bool operator==(const node &other) const noexcept
         {
@@ -269,12 +274,17 @@ public:
         }
     };
 
-    general_tree() noexcept : m_root(nullptr) {}
+    general_tree() noexcept
+        : m_root(nullptr)
+    {}
 
-    general_tree(general_tree<T> &&rhs) noexcept : m_root(std::exchange(rhs.m_root, nullptr)) {}
+    general_tree(general_tree<T> &&rhs) noexcept
+        : m_root(std::exchange(rhs.m_root, nullptr))
+    {}
 
     template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
-    general_tree(U &&root_value) : general_tree()
+    general_tree(U &&root_value)
+        : general_tree()
     {
         m_root = new private_node(std::forward<U>(root_value));
     }
