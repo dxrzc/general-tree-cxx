@@ -42,4 +42,16 @@ TEST_SUITE("general_tree::clear()")
         CHECK_NOTHROW(tree.clear());
         REQUIRE(tree.root().is_null());
     }
+
+    TEST_CASE("inserting new nodes after calling clear() is safe")
+    {
+        general_tree<int> gt(1);
+        gt.insert_left_child(gt.root(), 1);
+        gt.insert_right_sibling(gt.root().left_child(), 2);
+        gt.clear();
+
+        gt.create_root(1);
+        gt.insert_left_child(gt.root(), 1);
+        gt.insert_right_sibling(gt.root().left_child(), 2);
+    }
 }
