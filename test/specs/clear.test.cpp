@@ -14,10 +14,10 @@ TEST_SUITE("general_tree::clear()")
         tree.emplace_left_child(c1, "left-left", 4);
         tree.emplace_left_child(c2, "right-left", 5);
 
-        REQUIRE_EQ(Counter::copy_constructor_calls, 0);
-        REQUIRE_EQ(Counter::move_constructor_calls, 0);
-        REQUIRE_EQ(Counter::copy_assignment_calls, 0);
-        REQUIRE_EQ(Counter::move_assignment_calls, 0);
+        CHECK_EQ(Counter::copy_constructor_calls, 0);
+        CHECK_EQ(Counter::move_constructor_calls, 0);
+        CHECK_EQ(Counter::copy_assignment_calls, 0);
+        CHECK_EQ(Counter::move_assignment_calls, 0);
 
         tree.clear();
 

@@ -25,15 +25,15 @@ TEST_SUITE("general_tree::general_tree(root_value)")
     {
         Counter counter;
         general_tree<Counter> gt(std::move(counter));
-        REQUIRE_EQ(Counter::move_constructor_calls, 1);
-        REQUIRE_EQ(Counter::copy_constructor_calls, 0);
+        CHECK_EQ(Counter::move_constructor_calls, 1);
+        CHECK_EQ(Counter::copy_constructor_calls, 0);
     }
 
     TEST_CASE_FIXTURE(CounterFixture, "construction from temporary value triggers move")
     {
         general_tree<Counter> gt(Counter{});
-        REQUIRE_EQ(Counter::move_constructor_calls, 1);
-        REQUIRE_EQ(Counter::copy_constructor_calls, 0);
+        CHECK_EQ(Counter::move_constructor_calls, 1);
+        CHECK_EQ(Counter::copy_constructor_calls, 0);
     }
 }
 
@@ -45,8 +45,8 @@ TEST_SUITE("general_tree::general_tree(general_tree&& rhs)")
         counters.emplace_root("string", 0);
 
         general_tree<Counter> new_tree(std::move(counters));
-        REQUIRE_EQ(Counter::copy_constructor_calls, 0);
-        REQUIRE_EQ(Counter::move_constructor_calls, 0);
+        CHECK_EQ(Counter::copy_constructor_calls, 0);
+        CHECK_EQ(Counter::move_constructor_calls, 0);
     }
 
     TEST_CASE("rhs tree remains empty after operation")
