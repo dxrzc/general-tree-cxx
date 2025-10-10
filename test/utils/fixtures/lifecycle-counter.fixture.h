@@ -2,7 +2,7 @@
 #include <string>
 #include <utility>
 
-class Counter
+class LifecycleCounter
 {
 private:
     std::string m_string = "";
@@ -17,35 +17,35 @@ public:
 
     static void reset() noexcept
     {
-        Counter::copy_constructor_calls = 0;
-        Counter::move_constructor_calls = 0;
-        Counter::destructor_calls = 0;
-        Counter::copy_assignment_calls = 0;
-        Counter::move_assignment_calls = 0;
+        LifecycleCounter::copy_constructor_calls = 0;
+        LifecycleCounter::move_constructor_calls = 0;
+        LifecycleCounter::destructor_calls = 0;
+        LifecycleCounter::copy_assignment_calls = 0;
+        LifecycleCounter::move_assignment_calls = 0;
     }
 
-    Counter() = default;
+    LifecycleCounter() = default;
 
-    Counter(const std::string &string, int integer)
+    LifecycleCounter(const std::string &string, int integer)
         : m_string(string),
           m_int(integer)
     {}
 
-    Counter(const Counter &rhs)
+    LifecycleCounter(const LifecycleCounter &rhs)
         : m_string(rhs.m_string),
           m_int(rhs.m_int)
     {
         ++copy_constructor_calls;
     }
 
-    Counter(Counter &&rhs) noexcept
+    LifecycleCounter(LifecycleCounter &&rhs) noexcept
         : m_string(std::move(rhs.m_string)),
           m_int(rhs.m_int)
     {
         ++move_constructor_calls;
     }
 
-    Counter &operator=(const Counter &rhs)
+    LifecycleCounter &operator=(const LifecycleCounter &rhs)
     {
         if (this != &rhs)
         {
@@ -56,7 +56,7 @@ public:
         return *this;
     }
 
-    Counter &operator=(Counter &&rhs) noexcept
+    LifecycleCounter &operator=(LifecycleCounter &&rhs) noexcept
     {
         if (this != &rhs)
         {
@@ -67,7 +67,7 @@ public:
         return *this;
     }
 
-    ~Counter()
+    ~LifecycleCounter()
     {
         ++destructor_calls;
     }
@@ -83,11 +83,11 @@ public:
     }
 };
 
-struct CounterFixture
+struct LifecycleCounterFixture
 {
-    CounterFixture()
+    LifecycleCounterFixture()
     {
-        Counter::reset();
+        LifecycleCounter::reset();
     }
-    ~CounterFixture() = default;
+    ~LifecycleCounterFixture() = default;
 };
