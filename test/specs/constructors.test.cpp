@@ -37,6 +37,16 @@ TEST_SUITE("general_tree::general_tree(root_value)")
     }
 }
 
+TEST_SUITE("general_tree::general_tree(...args)")
+{
+    TEST_CASE_FIXTURE(CounterFixture, "create root and do not make copies")
+    {
+        general_tree<Counter> gt("string123", 100);
+        CHECK_EQ(gt.root().data().get_string(), "string123");
+        CHECK_EQ(gt.root().data().get_int(), 100);
+    }
+}
+
 TEST_SUITE("general_tree::general_tree(general_tree&& rhs)")
 {
     TEST_CASE_FIXTURE(CounterFixture, "do not make any copies or movements")
