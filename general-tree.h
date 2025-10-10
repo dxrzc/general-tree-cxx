@@ -289,6 +289,12 @@ public:
         m_root = new private_node(std::forward<U>(root_value));
     }
 
+    template <typename... Args>
+    general_tree(Args &&...args)
+    {
+        m_root = new private_node(std::forward<Args>(args)...);
+    }
+
     /**
      * @brief Creates and emplaces the root node of the tree with the given arguments.
      * @tparam Args Variadic template parameters representing the types of arguments to be forwarded to the root node
