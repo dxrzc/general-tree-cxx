@@ -13,6 +13,20 @@ TEST_CASE("default constructor")
     }
 }
 
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "root value construction")
+{
+    SUBCASE("create one copy of the provided value and store it in root")
+    {
+        LifecycleCounter value("string101", 101);
+        general_tree<LifecycleCounter> gt(value);
+        CHECK_EQ(gt.root().data().get_int(), value.get_int());
+        CHECK_EQ(gt.root().data().get_string(), value.get_string());
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 1);
+        CHECK_EQ(LifecycleCounter::parameterized_constructor_calls, 1);
+    }
+}
+
 TEST_CASE_FIXTURE(LifecycleCounterFixture, "root value construction (move)")
 {
     SUBCASE("provided value is stored in root with no copies")
