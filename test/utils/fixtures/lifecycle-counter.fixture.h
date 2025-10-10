@@ -1,4 +1,6 @@
 #pragma once
+#include "general-tree.h"
+#include <cassert>
 #include <string>
 #include <utility>
 
@@ -9,6 +11,7 @@ private:
     int m_int = 0;
 
 public:
+    static inline unsigned parameterized_constructor_calls;
     static inline unsigned copy_constructor_calls;
     static inline unsigned move_constructor_calls;
     static inline unsigned destructor_calls;
@@ -17,6 +20,7 @@ public:
 
     static void reset() noexcept
     {
+        LifecycleCounter::parameterized_constructor_calls = 0;
         LifecycleCounter::copy_constructor_calls = 0;
         LifecycleCounter::move_constructor_calls = 0;
         LifecycleCounter::destructor_calls = 0;
@@ -29,7 +33,9 @@ public:
     LifecycleCounter(const std::string &string, int integer)
         : m_string(string),
           m_int(integer)
-    {}
+    {
+        ++parameterized_constructor_calls;
+    }
 
     LifecycleCounter(const LifecycleCounter &rhs)
         : m_string(rhs.m_string),
