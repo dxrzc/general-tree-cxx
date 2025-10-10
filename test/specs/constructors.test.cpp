@@ -49,7 +49,7 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "root value construction (move)")
 
 TEST_CASE_FIXTURE(LifecycleCounterFixture, "root value construction (emplacement)")
 {
-    SUBCASE("provided vale is stored in root with no copies")
+    SUBCASE("provided arguments construct the value in root with no copies")
     {
         general_tree<LifecycleCounter> gt("string123", 100);
         CHECK_EQ(gt.root().data().get_string(), "string123");
