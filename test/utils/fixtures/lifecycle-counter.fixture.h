@@ -73,6 +73,11 @@ public:
         return *this;
     }
 
+    bool operator==(const LifecycleCounter& rhs) const noexcept
+    {
+        return m_int == rhs.m_int && m_string == rhs.m_string;
+    }
+
     ~LifecycleCounter()
     {
         ++destructor_calls;
