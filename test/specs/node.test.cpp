@@ -2,9 +2,9 @@
 #include "doctest.h"
 #include "general-tree.h"
 
-TEST_SUITE("general_tree::node")
+TEST_CASE("general_tree::node")
 {
-    TEST_CASE("right sibling, parent and left child are null by default")
+    SUBCASE("right sibling, parent and left child are null by default")
     {
         general_tree<int> tree(1);
         auto node = tree.root();
@@ -13,7 +13,7 @@ TEST_SUITE("general_tree::node")
         CHECK(node.parent().is_null());
     }
 
-    TEST_CASE("equality operator returns true when nodes are the same")
+    SUBCASE("equality operator returns true when nodes are the same")
     {
         general_tree<int> tree(1);
         auto root_node = tree.root();
@@ -24,7 +24,7 @@ TEST_SUITE("general_tree::node")
         REQUIRE_EQ(node, root_node);
     }
 
-    TEST_CASE("node::data()")
+    SUBCASE("node::data()")
     {
         SUBCASE("throw invalid argument if node is null")
         {
@@ -33,7 +33,7 @@ TEST_SUITE("general_tree::node")
         }
     }
 
-    TEST_CASE("node::child(index)")
+    SUBCASE("node::child(index)")
     {
         SUBCASE("throw invalid argument if node is null")
         {
@@ -61,7 +61,7 @@ TEST_SUITE("general_tree::node")
         }
     }
 
-    TEST_CASE("node::children_count()")
+    SUBCASE("node::children_count()")
     {
         SUBCASE("throw invalid argument if node is null")
         {
@@ -88,7 +88,7 @@ TEST_SUITE("general_tree::node")
         }
     }
 
-    TEST_CASE("node::depth()")
+    SUBCASE("node::depth()")
     {
         SUBCASE("return the depth of the current node")
         {
@@ -114,7 +114,7 @@ TEST_SUITE("general_tree::node")
         }
     }
 
-    TEST_CASE("node::descendants_count()")
+    SUBCASE("node::descendants_count()")
     {
         SUBCASE("throw invalid argument if node is null")
         {
