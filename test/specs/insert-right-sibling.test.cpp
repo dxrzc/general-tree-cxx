@@ -1,10 +1,109 @@
 #include "doctest.h"
 #include "general-tree.h"
-#include "utils/fixtures/counter.fixture.h"
+#include "utils/fixtures/lifecycle-counter.fixture.h"
+#include "utils/helpers/seed-tree.h"
 
-TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "insert_right_sibling")
 {
-    TEST_CASE("return invalid argument if destiny node is a root")
+    SUBCASE("create one copy of the provided value and insert it as right sibling")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(2);
+        LifecycleCounter value("string00", 0);
+        gt.insert_right_sibling(gt.root().left_child(), value);
+
+        CHECK_EQ(gt.root().left_child().right_sibling().data(), value);
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 1);
+        CHECK_EQ(LifecycleCounter::parameterized_constructor_calls, 1);
+    }
+
+    SUBCASE("created node should be the destiny node right sibling")
+    {
+        general_tree<int> tree(1);
+        auto destiny_node = tree.insert_left_child(tree.root(), 2);
+
+        auto node = tree.insert_right_sibling(destiny_node, 3);
+        REQUIRE_EQ(destiny_node.right_sibling(), node);
+    }
+
+    SUBCASE("destiny node parent should be the parent of the created node")
+    {
+        general_tree<int> tree(1);
+        auto destiny_node = tree.insert_left_child(tree.root(), 2);
+
+        auto node = tree.insert_right_sibling(destiny_node, 3);
+        REQUIRE_EQ(node.parent(), destiny_node.parent());
+    }
+
+    SUBCASE("return the inserted node")
+    {
+        general_tree<int> tree(1);
+        auto destiny_node = tree.insert_left_child(tree.root(), 2);
+
+        auto node = tree.insert_right_sibling(destiny_node, 3);
+        REQUIRE_EQ(node.data(), 3);
+    }
+
+    SUBCASE("throw invalid argument if destiny node is null")
+    {
+        general_tree<int> tree(1);
+        auto null_node = tree.root().left_child();
+        REQUIRE(null_node.is_null());
+
+        REQUIRE_THROWS_AS(tree.insert_right_sibling(null_node, 2), std::invalid_argument);
+    }
+
+    SUBCASE("throw invalid argument if destiny node is a root")
+    {
+        general_tree<int> tree(1);
+        auto root = tree.root();
+
+        REQUIRE_THROWS_AS(tree.insert_right_sibling(root, 2), std::invalid_argument);
+    }
+}
+
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "insert_right_sibling (move)")
+{
+    SUBCASE("do not create copies of the provided value and insert it as right sibling")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(2);
+        LifecycleCounter value("string09", 9);
+        gt.insert_right_sibling(gt.root().left_child(), std::move(value));
+
+        CHECK_EQ(gt.root().left_child().right_sibling().data().get_int(), 9);
+        CHECK_EQ(gt.root().left_child().right_sibling().data().get_string(), "string09");
+
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 1);
+        CHECK_EQ(LifecycleCounter::parameterized_constructor_calls, 1);
+    }
+
+    SUBCASE("temporary value triggers move")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(2);
+        gt.insert_right_sibling(gt.root().left_child(), LifecycleCounter{});
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 1);
+    }
+}
+
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "insert_right_sibling (emplacement)")
+{
+    SUBCASE("use the arguments to construct the value as the left child with no copies") 
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(2);
+        gt.emplace_right_sibling(gt.root().left_child(), "string11", 11);
+
+        CHECK_EQ(gt.root().left_child().right_sibling().data().get_int(), 11);
+        CHECK_EQ(gt.root().left_child().right_sibling().data().get_string(), "string11");
+
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::parameterized_constructor_calls, 1);
+    }
+}
+
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "insert_right_sibling (tree)") 
+{
+    SUBCASE("throw invalid argument if destiny node is a root")
     {
         general_tree<int> tree(0);
         auto destiny_node = tree.root();
@@ -12,7 +111,7 @@ TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
         REQUIRE_THROWS_AS(tree.insert_right_sibling(destiny_node, new_tree), std::invalid_argument);
     }
 
-    TEST_CASE("return invalid argument if destiny node is nullptr")
+    SUBCASE("throw invalid argument if destiny node is nullptr")
     {
         general_tree<int> tree(1);
         auto destiny_node = tree.root().left_child();
@@ -22,7 +121,7 @@ TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
         REQUIRE_THROWS_AS(tree.insert_right_sibling(destiny_node, new_tree), std::invalid_argument);
     }
 
-    TEST_CASE("return null node if tree is empty")
+    SUBCASE("return null node if tree is empty")
     {
         general_tree<int> tree(1);
         tree.insert_left_child(tree.root(), 2);
@@ -32,7 +131,7 @@ TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
         REQUIRE(node.is_null());
     }
 
-    TEST_CASE("inserted tree is empty after operation")
+    SUBCASE("inserted tree is empty after operation")
     {
         general_tree<int> tree(1);
         tree.insert_left_child(tree.root(), 2);
@@ -46,7 +145,7 @@ TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
         REQUIRE(new_tree.empty());
     }
 
-    TEST_CASE("inserted tree root should be the destiny node right sibling")
+    SUBCASE("inserted tree root should be the right sibling of the destiny node")
     {
         general_tree<int> tree(1);
         auto destiny_node = tree.insert_left_child(tree.root(), 2);
@@ -58,7 +157,7 @@ TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
         REQUIRE_EQ(destiny_node.right_sibling(), inserted_tree_root);
     }
 
-    TEST_CASE("destiny node parent is now the parent of the inserted tree")
+    SUBCASE("destiny node parent should be the parent of the inserted tree root node")
     {
         general_tree<int> tree(1);
         auto destiny_node = tree.insert_left_child(tree.root(), 2);
@@ -71,7 +170,7 @@ TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
         REQUIRE_EQ(destiny_node_parent, inserted_tree_root.parent());
     }
 
-    TEST_CASE("return root node of the inserted tree")
+    SUBCASE("return root node of the inserted tree")
     {
         general_tree<int> tree(1);
         tree.insert_left_child(tree.root(), 2);
@@ -81,88 +180,5 @@ TEST_SUITE("general_tree::insert_right_sibling(node, tree)")
 
         auto node = tree.insert_right_sibling(tree.root().left_child(), new_tree);
         REQUIRE_EQ(node, inserted_tree_root);
-    }
-}
-
-TEST_SUITE("general_tree::emplace_right_sibling(node, ...args)")
-{
-    TEST_CASE_FIXTURE(CounterFixture, "data is constructed inside node with no copies")
-    {
-        general_tree<Counter> tree{Counter()};
-        tree.insert_left_child(tree.root(), Counter());
-        Counter::reset();
-
-        auto node = tree.emplace_right_sibling(tree.root().left_child(), "string", 0);
-
-        CHECK_EQ(Counter::copy_constructor_calls, 0);
-        CHECK_EQ(node.data().get_int(), 0);
-        CHECK_EQ(node.data().get_string(), "string");
-    }
-}
-
-TEST_SUITE("general_tree::insert_right_sibling(node, data)")
-{
-    TEST_CASE_FIXTURE(CounterFixture, "do not make copies when data is an rvalue")
-    {
-        general_tree<Counter> tree(Counter{});
-        auto destiny_node = tree.insert_left_child(tree.root(), Counter{});
-        Counter c;
-        Counter::reset();
-        auto node = tree.insert_right_sibling(destiny_node, std::move(c));
-
-        CHECK_EQ(Counter::copy_constructor_calls, 0);
-        CHECK_EQ(Counter::move_constructor_calls, 1);
-    }
-
-    TEST_CASE("created node should be the destiny node right sibling")
-    {
-        general_tree<int> tree(1);
-        auto destiny_node = tree.insert_left_child(tree.root(), 2);
-
-        auto node = tree.insert_right_sibling(destiny_node, 3);
-        REQUIRE_EQ(destiny_node.right_sibling(), node);
-    }
-
-    TEST_CASE("destiny node parent should be the parent of the created node")
-    {
-        general_tree<int> tree(1);
-        auto destiny_node = tree.insert_left_child(tree.root(), 2);
-
-        auto node = tree.insert_right_sibling(destiny_node, 3);
-        REQUIRE_EQ(node.parent(), destiny_node.parent());
-    }
-
-    TEST_CASE("can not be inserted to root")
-    {
-        general_tree<int> tree(1);
-        auto root = tree.root();
-
-        REQUIRE_THROWS_AS(tree.insert_right_sibling(root, 2), std::invalid_argument);
-    }
-
-    TEST_CASE("return the inserted node")
-    {
-        general_tree<int> tree(1);
-        auto destiny_node = tree.insert_left_child(tree.root(), 2);
-
-        auto node = tree.insert_right_sibling(destiny_node, 3);
-        REQUIRE_EQ(node.data(), 3);
-    }
-
-    TEST_CASE("throw invalid argument if destiny node is null")
-    {
-        general_tree<int> tree(1);
-        auto null_node = tree.root().left_child();
-        REQUIRE(null_node.is_null());
-
-        REQUIRE_THROWS_AS(tree.insert_right_sibling(null_node, 2), std::invalid_argument);
-    }
-
-    TEST_CASE("throw invalid argument if destiny node is a root")
-    {
-        general_tree<int> tree(1);
-        auto root = tree.root();
-
-        REQUIRE_THROWS_AS(tree.insert_right_sibling(root, 2), std::invalid_argument);
     }
 }
