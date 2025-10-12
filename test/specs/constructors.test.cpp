@@ -1,102 +1,104 @@
 #include "doctest.h"
 #include "general-tree.h"
-#include "utils/fixtures/counter.fixture.h"
+#include "utils/fixtures/lifecycle-counter.fixture.h"
+#include "utils/helpers/seed-tree.h"
 #include <utility>
 
-TEST_SUITE("general_tree::general_tree()")
+TEST_CASE("default constructor")
 {
-    TEST_CASE("tree is empty by default")
+    SUBCASE("tree is empty")
     {
         general_tree<int> gt;
         REQUIRE(gt.empty());
     }
 }
 
-TEST_SUITE("general_tree::general_tree(root_value)")
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "root value construction")
 {
-    TEST_CASE("root_value is now the root")
+    SUBCASE("create one copy of the provided value and store it in root")
     {
-        const int root_value = 100201;
-        general_tree<int> gt(root_value);
-        REQUIRE_EQ(gt.root().data(), root_value);
-    }
-
-    TEST_CASE_FIXTURE(CounterFixture, "correct move semantics")
-    {
-        Counter counter;
-        general_tree<Counter> gt(std::move(counter));
-        CHECK_EQ(Counter::move_constructor_calls, 1);
-        CHECK_EQ(Counter::copy_constructor_calls, 0);
-    }
-
-    TEST_CASE_FIXTURE(CounterFixture, "construction from temporary value triggers move")
-    {
-        general_tree<Counter> gt(Counter{});
-        CHECK_EQ(Counter::move_constructor_calls, 1);
-        CHECK_EQ(Counter::copy_constructor_calls, 0);
+        LifecycleCounter value("string101", 101);
+        general_tree<LifecycleCounter> gt(value);
+        CHECK_EQ(gt.root().data().get_int(), value.get_int());
+        CHECK_EQ(gt.root().data().get_string(), value.get_string());
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 1);
+        CHECK_EQ(LifecycleCounter::parameterized_constructor_calls, 1);
     }
 }
 
-TEST_SUITE("general_tree::general_tree(...args)")
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "root value construction (move)")
 {
-    TEST_CASE_FIXTURE(CounterFixture, "create root and do not make copies")
+    SUBCASE("provided value is stored in root with no copies")
     {
-        general_tree<Counter> gt("string123", 100);
+        LifecycleCounter value("string100", 100);
+        general_tree<LifecycleCounter> gt(std::move(value));
+        CHECK_EQ(gt.root().data().get_int(), 100);
+        CHECK_EQ(gt.root().data().get_string(), "string100");
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 1);
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);        
+    }
+
+    SUBCASE("construction from temporary value triggers move")
+    {
+        general_tree<LifecycleCounter> gt(LifecycleCounter{});
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 1);
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
+    }
+}
+
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "root value construction (emplacement)")
+{
+    SUBCASE("provided arguments construct the value in root with no copies")
+    {
+        general_tree<LifecycleCounter> gt("string123", 100);
         CHECK_EQ(gt.root().data().get_string(), "string123");
         CHECK_EQ(gt.root().data().get_int(), 100);
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
     }
 }
 
-TEST_SUITE("general_tree::general_tree(general_tree&& rhs)")
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "move constructor")
 {
-    TEST_CASE_FIXTURE(CounterFixture, "do not make any copies or movements")
+    SUBCASE("do not trigger any T's constructor")
     {
-        general_tree<Counter> counters;
-        counters.emplace_root("string", 0);
-
-        general_tree<Counter> new_tree(std::move(counters));
-        CHECK_EQ(Counter::copy_constructor_calls, 0);
-        CHECK_EQ(Counter::move_constructor_calls, 0);
+        general_tree<LifecycleCounter> gt = seed_tree(5);
+        auto gt2 = std::move(gt);
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::parameterized_constructor_calls, 0);
     }
 
-    TEST_CASE("rhs tree remains empty after operation")
+    SUBCASE("other tree remains empty after move")
     {
-        general_tree<int> rhs(1);
-        rhs.insert_left_child(rhs.root(), 2);
-        rhs.insert_right_sibling(rhs.root().left_child(), 3);
-
-        general_tree<int> tree(std::move(rhs));
-        REQUIRE(rhs.empty());
+        general_tree<LifecycleCounter> gt = seed_tree(2);
+        auto gt2 = std::move(gt);
+        REQUIRE(gt.empty());
     }
 
-    TEST_CASE("new tree contains all the nodes of the rhs tree")
+    SUBCASE("left tree contains all the nodes of the right tree")
     {
-        general_tree<int> rhs(1);
-        rhs.insert_left_child(rhs.root(), 2);
-        rhs.insert_right_sibling(rhs.root().left_child(), 3);
-
-        auto root_node = rhs.root();
-
-        general_tree<int> tree(std::move(rhs));
-        REQUIRE_EQ(tree.root(), root_node);
+        // TODO: create an array based on an iteration type.
     }
 
-    TEST_CASE("no errors if rhs tree is empty")
+    SUBCASE("no error if the other tree is empty")
     {
         general_tree<int> empty;
-        general_tree<int> gt(std::move(empty));
+        general_tree<LifecycleCounter> gt = seed_tree(5);
+        REQUIRE_NOTHROW(auto gt2 = std::move(gt));
     }
 
-    TEST_CASE("moved-from tree can be reused normally afterwards")
+    SUBCASE("moved-from tree can be reused normally afterwards")
     {
-        general_tree<int> movedfrom(0);
-        movedfrom.insert_left_child(movedfrom.root(), 1);
-        movedfrom.insert_right_sibling(movedfrom.root().left_child(), 2);
-        general_tree<int> gt(std::move(movedfrom));
+        general_tree<LifecycleCounter> moved_from = seed_tree(3);
+        auto gt = std::move(moved_from);
 
-        movedfrom.create_root(1);
-        movedfrom.insert_left_child(movedfrom.root(), 2);
-        movedfrom.insert_right_sibling(movedfrom.root().left_child(), 3);
-        movedfrom.insert_left_child(movedfrom.root(), 4);
-    }
+        moved_from.emplace_root("string", 0);
+        moved_from.emplace_left_child(moved_from.root(), "string1", 1);
+        moved_from.emplace_right_sibling(moved_from.root().left_child(), "string2", 2);
+        moved_from.clear();
+        // new nodes destroyed successfully
+        REQUIRE_EQ(LifecycleCounter::destructor_calls, 3);
+    }   
 }

@@ -1,20 +1,28 @@
 #include "doctest.h"
 #include "general-tree.h"
-#include "utils/fixtures/counter.fixture.h"
+#include "utils/fixtures/lifecycle-counter.fixture.h"
+#include "utils/helpers/seed-tree.h"
 
-TEST_SUITE("general_tree:insert_left_child(node, data)")
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "insert_left_child")
 {
-    TEST_CASE_FIXTURE(CounterFixture, "do not create copies when data is an rvalue")
+    SUBCASE("make one copy of the provided value and insert it as left child")
     {
-        general_tree<Counter> counter_tree{Counter()};
-        Counter::reset();
-        Counter c;
-        counter_tree.insert_left_child(counter_tree.root(), std::move(c));
-        CHECK_EQ(Counter::copy_constructor_calls, 0);
-        CHECK_EQ(Counter::move_constructor_calls, 1);
+        general_tree<LifecycleCounter> gt = seed_tree(3);
+        LifecycleCounter value("string1", 1);
+        gt.insert_left_child(gt.root().left_child(), value);
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 1);
+        CHECK_EQ(LifecycleCounter::parameterized_constructor_calls, 1);
+        CHECK_EQ(gt.root().left_child().data(), value);
     }
 
-    TEST_CASE("throw invalid argument if destiny node is null")
+    SUBCASE("destiny node is now the parent of the inserted node")
+    {
+        general_tree<int> tree(1);
+        auto node = tree.insert_left_child(tree.root(), 100);
+        REQUIRE_EQ(node.parent().data(), tree.root().data());
+    }
+
+    SUBCASE("throw invalid argument if destiny node is null")
     {
         general_tree<int> tree(1);
         auto null_dest_node = tree.root().left_child();
@@ -22,33 +30,60 @@ TEST_SUITE("general_tree:insert_left_child(node, data)")
         REQUIRE_THROWS_AS(tree.insert_left_child(null_dest_node, tree), std::invalid_argument);
     }
 
-    TEST_CASE("data is stored in the left child of the destiny node")
-    {
-        general_tree<int> tree(1);
-        const int new_value = 12121;
-        tree.insert_left_child(tree.root(), new_value);
-        REQUIRE_EQ(tree.root().left_child().data(), new_value);
-    }
-
-    TEST_CASE("return the created node")
+    SUBCASE("return the created node")
     {
         general_tree<int> tree(1);
         const int new_value = 83190831;
         auto node = tree.insert_left_child(tree.root(), new_value);
         REQUIRE_EQ(node.data(), new_value);
     }
+}
 
-    TEST_CASE("destiny node is now the parent of the inserted node")
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "insert_left_child (move)")
+{
+    SUBCASE("do not make copies of the provided value and insert it as left child")
     {
-        general_tree<int> tree(1);
-        auto node = tree.insert_left_child(tree.root(), 100);
-        REQUIRE_EQ(node.parent().data(), tree.root().data());
+        general_tree<LifecycleCounter> gt = seed_tree(3);
+        LifecycleCounter value("string1", 1);
+        gt.insert_left_child(gt.root(), std::move(value));
+
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::parameterized_constructor_calls, 1);
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 1);
+
+        CHECK_EQ(gt.root().left_child().data().get_int(), 1);
+        CHECK_EQ(gt.root().left_child().data().get_string(), "string1");
+    }
+
+    SUBCASE("temporary value triggers move")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(1);
+        gt.insert_left_child(gt.root(), LifecycleCounter{});
+
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 1);
     }
 }
 
-TEST_SUITE("general_tree::insert_left_child(node, tree)")
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "insert_left_child (emplacement)")
 {
-    TEST_CASE("destiny node is now the parent of the inserted tree")
+    SUBCASE("use the arguments to construct the value as the left child")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(1);
+        gt.emplace_left_child(gt.root(), "string100", 100);
+
+        CHECK_EQ(gt.root().left_child().data().get_int(), 100);
+        CHECK_EQ(gt.root().left_child().data().get_string(), "string100");
+
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::move_constructor_calls, 0);
+        CHECK_EQ(LifecycleCounter::parameterized_constructor_calls, 1);
+    }
+}
+
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "insert_left_child (tree)")
+{
+    SUBCASE("destiny node is now the parent of the inserted tree root")
     {
         general_tree<int> tree(1);
         general_tree<int> new_tree(999);
@@ -58,7 +93,7 @@ TEST_SUITE("general_tree::insert_left_child(node, tree)")
         REQUIRE_EQ(inserted_tree_root.parent(), tree.root());
     }
 
-    TEST_CASE("inserted tree is empty after operation")
+    SUBCASE("moved-from tree is empty after operation")
     {
         general_tree<int> tree(1);
         general_tree<int> new_tree(1);
@@ -70,7 +105,7 @@ TEST_SUITE("general_tree::insert_left_child(node, tree)")
         REQUIRE(new_tree.empty());
     }
 
-    TEST_CASE("return the root node of the inserted tree")
+    SUBCASE("return the root node of the inserted tree")
     {
         general_tree<int> tree(1);
         general_tree<int> new_tree(101);
@@ -80,7 +115,7 @@ TEST_SUITE("general_tree::insert_left_child(node, tree)")
         REQUIRE_EQ(node, inserted_tree_root);
     }
 
-    TEST_CASE("throw invalid argument if destiny node is null")
+    SUBCASE("throw invalid argument if destiny node is null")
     {
         general_tree<int> tree(1);
         general_tree<int> new_tree(1);
@@ -89,7 +124,7 @@ TEST_SUITE("general_tree::insert_left_child(node, tree)")
         REQUIRE_THROWS_AS(tree.insert_left_child(null_dest_node, new_tree), std::invalid_argument);
     }
 
-    TEST_CASE("return null node if inserted tree is empty")
+    SUBCASE("return null node if inserted tree is empty")
     {
         general_tree<int> tree(1);
         general_tree<int> empty_tree;
@@ -97,24 +132,9 @@ TEST_SUITE("general_tree::insert_left_child(node, tree)")
         REQUIRE(node.is_null());
     }
 
-    TEST_CASE("throw invalid argument if tree is inserted to its own root")
+    SUBCASE("throw invalid argument if tree is inserted to its own root")
     {
         general_tree<int> tree(1);
         REQUIRE_THROWS_AS(tree.insert_left_child(tree.root(), tree), std::invalid_argument);
-    }
-}
-
-TEST_SUITE("general_tree::emplace_left_child(...args)")
-{
-    TEST_CASE_FIXTURE(CounterFixture, "data is constructed inside node with no copies")
-    {
-        general_tree<Counter> tree{Counter()};
-        Counter::reset();
-
-        auto node = tree.emplace_left_child(tree.root(), "string", 0);
-
-        CHECK_EQ(Counter::copy_constructor_calls, 0);
-        CHECK_EQ(node.data().get_int(), 0);
-        CHECK_EQ(node.data().get_string(), "string");
     }
 }

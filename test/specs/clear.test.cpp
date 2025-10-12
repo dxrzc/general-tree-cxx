@@ -1,57 +1,45 @@
 #include "doctest.h"
 #include "general-tree.h"
-#include "utils/fixtures/counter.fixture.h"
+#include "utils/fixtures/lifecycle-counter.fixture.h"
+#include "utils/helpers/seed-tree.h"
 
-TEST_SUITE("general_tree::clear()")
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "clear")
 {
-    TEST_CASE_FIXTURE(CounterFixture, "delete all the nodes from the tree")
+    SUBCASE("delete all nodes from tree")
     {
-        general_tree<Counter> tree;
-
-        auto root = tree.emplace_root("root", 1);
-        auto c1 = tree.emplace_left_child(root, "left", 2);
-        auto c2 = tree.emplace_right_sibling(c1, "right", 3);
-        tree.emplace_left_child(c1, "left-left", 4);
-        tree.emplace_left_child(c2, "right-left", 5);
-
-        CHECK_EQ(Counter::copy_constructor_calls, 0);
-        CHECK_EQ(Counter::move_constructor_calls, 0);
-        CHECK_EQ(Counter::copy_assignment_calls, 0);
-        CHECK_EQ(Counter::move_assignment_calls, 0);
-
-        tree.clear();
-
-        REQUIRE_EQ(Counter::destructor_calls, 5);
-    }
-
-    TEST_CASE("tree is empty after clear")
-    {
-        general_tree<int> tree(0);
-        tree.insert_left_child(tree.root(), 1);
-        tree.insert_left_child(tree.root(), 2);
-        tree.insert_right_sibling(tree.root().left_child(), 3);
-        tree.clear();
-        REQUIRE(tree.empty());
-    }
-
-    TEST_CASE("calling clear() on an already empty tree is safe")
-    {
-        general_tree<int> tree;
-        REQUIRE(tree.root().is_null());
-
-        CHECK_NOTHROW(tree.clear());
-        REQUIRE(tree.root().is_null());
-    }
-
-    TEST_CASE("inserting new nodes after calling clear() is safe")
-    {
-        general_tree<int> gt(1);
-        gt.insert_left_child(gt.root(), 1);
-        gt.insert_right_sibling(gt.root().left_child(), 2);
+        std::size_t gt_size = 10;
+        general_tree<LifecycleCounter> gt = seed_tree(gt_size);
         gt.clear();
+        REQUIRE_EQ(LifecycleCounter::destructor_calls, gt_size);
+    }
 
-        gt.create_root(1);
-        gt.insert_left_child(gt.root(), 1);
-        gt.insert_right_sibling(gt.root().left_child(), 2);
+    SUBCASE("tree is empty after clear")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(5);
+        gt.clear();
+        REQUIRE(gt.empty());
+    }
+
+    SUBCASE("calling clear on an empty tree is safe")
+    {
+        general_tree<int> emptygt;
+        REQUIRE(emptygt.root().is_null());
+        REQUIRE_NOTHROW(emptygt.clear());
+        REQUIRE(emptygt.root().is_null());
+    }
+
+    SUBCASE("inserting new nodes after clear is safe")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(5);
+        gt.clear();
+        // reset
+        LifecycleCounter::destructor_calls = 0;
+
+        gt.emplace_root("string", 0);
+        gt.emplace_left_child(gt.root(), "string1", 1);
+        gt.emplace_right_sibling(gt.root().left_child(), "string2", 2);
+        gt.clear();
+        // new nodes destroyed successfully
+        REQUIRE_EQ(LifecycleCounter::destructor_calls, 3);
     }
 }
