@@ -471,6 +471,11 @@ public:
         m_root = nullptr;
     }
 
+    void delete_right_sibling(node n)
+    {
+        delete_from_node(n.m_node->m_right_sibling);
+    }
+
     void delete_left_child(node n)
     {
         delete_from_node(n.m_node->m_left_child);
