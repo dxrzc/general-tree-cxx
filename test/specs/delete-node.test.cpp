@@ -1,6 +1,7 @@
 #include "general-tree.h"
 #include "utils/fixtures/lifecycle-counter.fixture.h"
 #include <doctest.h>
+#include <stdexcept>
 
 TEST_CASE_FIXTURE(LifecycleCounterFixture, "delete left child")
 {
@@ -32,6 +33,22 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "delete left child")
         // should be deleted, root and two nodes
         gt.clear();
         CHECK_EQ(LifecycleCounter::destructor_calls, 3);
+    }
+
+    SUBCASE("throw invalid argument if node is null")
+    {
+        general_tree<int> gt;
+        const auto node = gt.root();
+        REQUIRE(node.is_null());
+        REQUIRE_THROWS_AS(gt.delete_left_child(node), std::invalid_argument);
+    }
+
+    SUBCASE("no error if node does not have a left child")
+    {
+        general_tree<int> gt(1);
+        const auto node = gt.root();
+        REQUIRE(node.left_child().is_null());
+        CHECK_NOTHROW(gt.delete_left_child(node));
     }
 }
 
@@ -70,5 +87,28 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "delete right sibling")
         // should delete root, its child and right sibling branch
         gt.clear();
         CHECK_EQ(LifecycleCounter::destructor_calls, 4);
+    }
+
+    SUBCASE("throw invalid argument if node is null")
+    {
+        general_tree<int> gt(1);
+        const auto node = gt.root().left_child();
+        REQUIRE(node.is_null());
+        REQUIRE_THROWS_AS(gt.delete_right_sibling(node), std::invalid_argument);
+    }
+
+    SUBCASE("no error if node does not have a right sibling")
+    {
+        general_tree<int> gt(1);
+        const auto node = gt.insert_left_child(gt.root(), 2);
+        CHECK(node.right_sibling().is_null());
+        CHECK_NOTHROW(gt.delete_right_sibling(node));
+    }
+
+    SUBCASE("throw invalid argument if node is a root node")
+    {
+        general_tree<int> gt(1);
+        gt.insert_left_child(gt.root(), 2);
+        REQUIRE_THROWS_AS(gt.delete_right_sibling(gt.root()), std::invalid_argument);
     }
 }
