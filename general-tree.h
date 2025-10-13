@@ -473,11 +473,20 @@ public:
 
     void delete_right_sibling(node n)
     {
+        if (n.is_null())
+            throw std::invalid_argument("Can not delete right sibling of null node");
+
+        if (n.is_root())
+            throw std::invalid_argument("Can not delete right sibling of root node");
+
         delete_from_node(n.m_node->m_right_sibling);
     }
 
     void delete_left_child(node n)
     {
+        if (n.is_null())
+            throw std::invalid_argument("Can not delete left child of null node");
+
         delete_from_node(n.m_node->m_left_child);
     }
 };
