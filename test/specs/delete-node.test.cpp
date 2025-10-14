@@ -50,6 +50,30 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "delete left child")
         REQUIRE(node.left_child().is_null());
         CHECK_NOTHROW(gt.delete_left_child(node));
     }
+
+    SUBCASE("make the next children the new left child")
+    {
+        general_tree<int> gt(1);
+        const auto next_child = gt.insert_left_child(gt.root(), 1920121);
+        gt.insert_left_child(gt.root(), 389813); // deleted
+
+        gt.delete_left_child(gt.root());
+
+        REQUIRE_EQ(gt.root().left_child(), next_child);
+    }
+
+    SUBCASE("children count is decreased")
+    {
+        general_tree<int> gt(1);
+        gt.insert_left_child(gt.root(), 1);
+        gt.insert_left_child(gt.root(), 2);
+        gt.insert_left_child(gt.root(), 3);
+        gt.insert_left_child(gt.root(), 4);
+
+        gt.delete_left_child(gt.root());
+
+        REQUIRE_EQ(gt.root().children_count(), 3);
+    }
 }
 
 TEST_CASE_FIXTURE(LifecycleCounterFixture, "delete right sibling")
@@ -110,5 +134,31 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "delete right sibling")
         general_tree<int> gt(1);
         gt.insert_left_child(gt.root(), 2);
         REQUIRE_THROWS_AS(gt.delete_right_sibling(gt.root()), std::invalid_argument);
+    }
+
+    SUBCASE("make the next sibling the right sibling")
+    {
+        general_tree<int> gt(1);
+        const auto node = gt.insert_left_child(gt.root(), 2);
+
+        const auto next_sibling = gt.insert_right_sibling(node, 3);
+        gt.insert_right_sibling(node, 4);
+
+        gt.delete_right_sibling(node);
+
+        REQUIRE_EQ(node.right_sibling(), next_sibling);
+    }
+
+    SUBCASE("parent's children count is decreased")
+    {
+        general_tree<int> gt(1);
+        gt.insert_left_child(gt.root(), 1);
+        gt.insert_left_child(gt.root(), 2);
+        gt.insert_left_child(gt.root(), 3);
+        gt.insert_left_child(gt.root(), 4);
+
+        gt.delete_right_sibling(gt.root().left_child());
+
+        REQUIRE_EQ(gt.root().children_count(), 3);
     }
 }
