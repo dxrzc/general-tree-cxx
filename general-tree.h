@@ -11,24 +11,22 @@ private:
     struct private_node
     {
         T m_data;
-        private_node *m_right_sibling;
-        private_node *m_left_child;
-        private_node *m_parent;
+        private_node* m_right_sibling;
+        private_node* m_left_child;
+        private_node* m_parent;
 
         template <typename... Args>
-        private_node(Args &&...args)
-            : m_right_sibling(nullptr),
-              m_left_child(nullptr),
-              m_parent(nullptr),
-              m_data(std::forward<Args>(args)...)
-        {}
+        private_node(Args&&... args)
+            : m_right_sibling(nullptr), m_left_child(nullptr), m_parent(nullptr), m_data(std::forward<Args>(args)...)
+        {
+        }
     };
 
-    private_node *m_root;
+    private_node* m_root;
 
     // - handles null node
     // - sets the pointers to nullptr
-    void delete_from_node(private_node *pnode)
+    void delete_from_node(private_node* pnode)
     {
         if (pnode == nullptr)
             return;
@@ -42,7 +40,7 @@ private:
 
         if (is_right_sibling)
         {
-            private_node *aux = pnode->m_parent->m_left_child;
+            private_node* aux = pnode->m_parent->m_left_child;
             while (aux->m_right_sibling != pnode)
                 aux = aux->m_right_sibling;
             aux->m_right_sibling = pnode->m_right_sibling;
@@ -51,16 +49,16 @@ private:
         // Breadth First Algorithm
         // Save the children in the queue and delete the parent
 
-        std::queue<private_node *> queue;
+        std::queue<private_node*> queue;
         queue.push(pnode);
 
-        private_node *current = nullptr;
+        private_node* current = nullptr;
         while (!queue.empty())
         {
             current = queue.front();
             queue.pop();
 
-            for (private_node *child = current->m_left_child; child != nullptr; child = child->m_right_sibling)
+            for (private_node* child = current->m_left_child; child != nullptr; child = child->m_right_sibling)
                 queue.push(child);
 
             delete current;
@@ -74,15 +72,13 @@ public:
     class node
     {
     private:
-        private_node *m_node;
+        private_node* m_node;
         friend class general_tree;
 
     public:
-        node(private_node *node = nullptr) noexcept
-            : m_node(node)
-        {}
+        node(private_node* node = nullptr) noexcept : m_node(node) {}
 
-        bool operator==(const node &other) const noexcept
+        bool operator==(const node& other) const noexcept
         {
             return m_node == other.m_node;
         }
@@ -119,7 +115,7 @@ public:
          * @return const T& Reference to the data stored in the node.
          * @throws std::invalid_argument If the given node is null.
          */
-        [[nodiscard]] const T &data() const
+        [[nodiscard]] const T& data() const
         {
             if (!m_node)
                 throw std::invalid_argument("Cannot get data from null node");
@@ -131,9 +127,9 @@ public:
          * @return T& Reference to the data stored in the node.
          * @throws std::invalid_argument If the given node is null.
          */
-        [[nodiscard]] T &data()
+        [[nodiscard]] T& data()
         {
-            return const_cast<T &>(static_cast<const general_tree<T>::node &>(*this).data());
+            return const_cast<T&>(static_cast<const general_tree<T>::node&>(*this).data());
         }
 
         /*
@@ -215,7 +211,7 @@ public:
                 throw std::invalid_argument("Cannot count children of null node");
 
             std::size_t count = 0;
-            for (const private_node *child = m_node->m_left_child; child != nullptr; child = child->m_right_sibling)
+            for (const private_node* child = m_node->m_left_child; child != nullptr; child = child->m_right_sibling)
                 ++count;
 
             return count;
@@ -231,7 +227,7 @@ public:
             if (m_node == nullptr)
                 throw std::invalid_argument("Cannot get depth of null node");
 
-            private_node *aux = m_node;
+            private_node* aux = m_node;
             std::size_t depth = 0;
 
             while (aux->m_parent != nullptr)
@@ -254,15 +250,15 @@ public:
                 throw std::invalid_argument("Cannot get height of null node");
 
             std::size_t count = 0;
-            std::queue<private_node *> q;
+            std::queue<private_node*> q;
             q.push(m_node);
 
             while (!q.empty())
             {
-                private_node *current_node = q.front();
+                private_node* current_node = q.front();
                 q.pop();
 
-                for (private_node *left_child = current_node->m_left_child; left_child != nullptr;
+                for (private_node* left_child = current_node->m_left_child; left_child != nullptr;
                      left_child = left_child->m_right_sibling)
                 {
                     q.push(left_child);
@@ -274,23 +270,18 @@ public:
         }
     };
 
-    general_tree() noexcept
-        : m_root(nullptr)
-    {}
+    general_tree() noexcept : m_root(nullptr) {}
 
-    general_tree(general_tree<T> &&rhs) noexcept
-        : m_root(std::exchange(rhs.m_root, nullptr))
-    {}
+    general_tree(general_tree<T>&& rhs) noexcept : m_root(std::exchange(rhs.m_root, nullptr)) {}
 
     template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
-    general_tree(U &&root_value)
-        : general_tree()
+    general_tree(U&& root_value) : general_tree()
     {
         m_root = new private_node(std::forward<U>(root_value));
     }
 
     template <typename... Args>
-    general_tree(Args &&...args)
+    general_tree(Args&&... args)
     {
         m_root = new private_node(std::forward<Args>(args)...);
     }
@@ -304,7 +295,7 @@ public:
      * @throws std::runtime_error If a root node already exists.
      */
     template <typename... Args>
-    node emplace_root(Args &&...args)
+    node emplace_root(Args&&... args)
     {
         if (m_root != nullptr)
             throw std::runtime_error("Root already exists");
@@ -319,7 +310,7 @@ public:
      * @throws std::runtime_error If a root node already exists.
      */
     template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
-    node create_root(U &&data)
+    node create_root(U&& data)
     {
         return emplace_root(std::forward<U>(data));
     }
@@ -333,12 +324,12 @@ public:
      * @throws std::invalid_argument If the destination node is null.
      */
     template <typename... Args>
-    node emplace_left_child(node destiny, Args &&...args)
+    node emplace_left_child(node destiny, Args&&... args)
     {
         if (destiny.m_node == nullptr)
             throw std::invalid_argument("Cannot insert left child to null node");
 
-        private_node *new_node = new private_node(std::forward<Args>(args)...);
+        private_node* new_node = new private_node(std::forward<Args>(args)...);
         new_node->m_right_sibling = destiny.m_node->m_left_child;
         new_node->m_parent = destiny.m_node;
 
@@ -354,7 +345,7 @@ public:
      * @throws std::invalid_argument If the destination node is null.
      */
     template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
-    node insert_left_child(node destiny, U &&new_node_value)
+    node insert_left_child(node destiny, U&& new_node_value)
     {
         return emplace_left_child(destiny, std::forward<U>(new_node_value));
     }
@@ -367,7 +358,7 @@ public:
      * @throws std::invalid_argument If the destination node is null or if attempting to insert the tree as a child of
      * its own root.
      */
-    node insert_left_child(node destiny, general_tree<T> &tree)
+    node insert_left_child(node destiny, general_tree<T>& tree)
     {
         if (!destiny.m_node)
             throw std::invalid_argument("Cannot insert left child to null node");
@@ -395,7 +386,7 @@ public:
      * @throws std::invalid_argument If the destination node is null, is the root (cannot have siblings),
      *                               or if attempting to insert the tree as its own sibling.
      */
-    node insert_right_sibling(node destiny, general_tree<T> &tree)
+    node insert_right_sibling(node destiny, general_tree<T>& tree)
     {
         if (destiny.m_node == nullptr)
             throw std::invalid_argument("Cannot insert right sibling to null node");
@@ -427,7 +418,7 @@ public:
      * @throws std::invalid_argument If the destination node is null or is the root (cannot have a sibling).
      */
     template <typename... Args>
-    node emplace_right_sibling(node destiny, Args &&...args)
+    node emplace_right_sibling(node destiny, Args&&... args)
     {
         if (destiny.m_node == nullptr)
             throw std::invalid_argument("Cannot insert right sibling to null node");
@@ -435,7 +426,7 @@ public:
         if (destiny.m_node->m_parent == nullptr)
             throw std::invalid_argument("Cannot insert right sibling to root");
 
-        private_node *new_node = new private_node(std::forward<Args>(args)...);
+        private_node* new_node = new private_node(std::forward<Args>(args)...);
         new_node->m_parent = destiny.m_node->m_parent;
         new_node->m_right_sibling = destiny.m_node->m_right_sibling;
         destiny.m_node->m_right_sibling = new_node;
@@ -450,7 +441,7 @@ public:
      * @throws std::invalid_argument If the destination node is null or is the root (cannot have a sibling).
      */
     template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
-    node insert_right_sibling(node destiny, U &&new_node_value)
+    node insert_right_sibling(node destiny, U&& new_node_value)
     {
         return emplace_right_sibling(destiny, std::forward<U>(new_node_value));
     }
@@ -480,8 +471,22 @@ public:
         m_root = nullptr;
     }
 
+    void delete_right_sibling(node n)
+    {
+        if (n.is_null())
+            throw std::invalid_argument("Can not delete right sibling of null node");
+
+        if (n.is_root())
+            throw std::invalid_argument("Can not delete right sibling of root node");
+
+        delete_from_node(n.m_node->m_right_sibling);
+    }
+
     void delete_left_child(node n)
     {
+        if (n.is_null())
+            throw std::invalid_argument("Can not delete left child of null node");
+
         delete_from_node(n.m_node->m_left_child);
     }
 };
