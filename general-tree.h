@@ -286,6 +286,51 @@ public:
         m_root = new private_node(std::forward<Args>(args)...);
     }
 
+    bool operator==(const general_tree<T>& other)
+    {
+        if (m_root == other.m_root)
+            return true;
+
+        if (m_root == nullptr || other.m_root == nullptr)
+            return false;
+
+        if (m_root->m_data != other.m_root->m_data)
+            return false;
+
+        // Breadth First Algorithm
+        // Compare the children of the equal nodes
+
+        std::queue<std::pair<private_node*, private_node*>> equal_nodes;
+        equal_nodes.push({m_root, other.m_root});
+
+        while (!equal_nodes.empty())
+        {
+            private_node* tree1_node = equal_nodes.front().first;
+            private_node* tree2_node = equal_nodes.front().second;
+            equal_nodes.pop();
+
+            // compare every child of both nodes
+            private_node* tree1_node_current_child = tree1_node->m_left_child;
+            private_node* tree2_node_current_child = tree2_node->m_left_child;
+            while (tree1_node_current_child != nullptr && tree2_node_current_child != nullptr)
+            {
+                if (tree1_node_current_child->m_data != tree2_node_current_child->m_data)
+                    return false;
+
+                equal_nodes.push({tree1_node_current_child, tree2_node_current_child});
+
+                tree2_node_current_child = tree2_node_current_child->m_right_sibling;
+                tree1_node_current_child = tree1_node_current_child->m_right_sibling;
+            }
+
+            // a node contains more children than the other
+            if (tree1_node_current_child != nullptr || tree2_node_current_child != nullptr)
+                return false;
+        }
+
+        return true;
+    }
+
     /**
      * @brief Creates and emplaces the root node of the tree with the given arguments.
      * @tparam Args Variadic template parameters representing the types of arguments to be forwarded to the root node
