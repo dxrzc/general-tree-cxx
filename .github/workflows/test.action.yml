@@ -6,9 +6,17 @@ on:
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true            
-jobs:
+jobs:  
   Test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix: 
+        os: [ubuntu-latest]
+        compiler: [llvm, gcc]
+        include:
+          - os: windows-latest
+            compiler: msvc
+    runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v5
 
@@ -26,7 +34,7 @@ jobs:
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
-          compiler: gcc
+          compiler: ${{matrix.compiler}}
           cmake: true
           ninja: true
           ccache: true
