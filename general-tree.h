@@ -280,7 +280,7 @@ public:
         m_root = new private_node(std::forward<U>(root_value));
     }
 
-    bool operator==(const general_tree<T>& other)
+    bool operator==(const general_tree<T>& other) const
     {
         if (m_root == other.m_root)
             return true;
