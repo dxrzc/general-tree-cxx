@@ -7,6 +7,9 @@
 template <typename T>
 class general_tree
 {
+public:
+    class node;
+
 private:
     struct private_node
     {
@@ -62,6 +65,48 @@ private:
                 queue.push(child);
 
             delete current;
+        }
+    }
+
+    void deep_copy(node n)
+    {
+        // Breadth First Algorithm
+        // Copy children of each node
+        if (n.m_node == nullptr)
+            return;
+
+        private_node* copy_root = new private_node(n.m_node->m_data);
+        m_root = copy_root;
+
+        // keeps track of nodes whose children still need to be copied
+        std::queue<std::pair<private_node*, private_node*>> org_copy_relation_queue;
+        org_copy_relation_queue.push({n.m_node, copy_root});
+
+        while (!org_copy_relation_queue.empty())
+        {
+            private_node* original_node = org_copy_relation_queue.front().first;
+            private_node* copied_node = org_copy_relation_queue.front().second;
+            org_copy_relation_queue.pop();
+
+            private_node* child_original = original_node->m_left_child;
+            private_node* prev_copied_child = nullptr;
+
+            // children copy algorithm
+            while (child_original != nullptr)
+            {
+                private_node* child_copy = new private_node(child_original->m_data);
+
+                // if it is the first copied child, it goes as left child
+                if (prev_copied_child == nullptr)
+                    copied_node->m_left_child = child_copy;
+                else
+                    prev_copied_child->m_right_sibling = child_copy;
+
+                org_copy_relation_queue.push({child_original, child_copy});
+
+                prev_copied_child = child_copy;
+                child_original = child_original->m_right_sibling;
+            }
         }
     }
 
@@ -273,6 +318,11 @@ public:
     general_tree() noexcept : m_root(nullptr) {}
 
     general_tree(general_tree<T>&& rhs) noexcept : m_root(std::exchange(rhs.m_root, nullptr)) {}
+
+    general_tree(const general_tree<T>& other) : general_tree<T>()
+    {
+        deep_copy(other.root());
+    }
 
     template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
     general_tree(U&& root_value) : general_tree()
