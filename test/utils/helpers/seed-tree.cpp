@@ -6,7 +6,8 @@ general_tree<LifecycleCounter> seed_tree(std::size_t max)
     if (max == 0)
         return general_tree<LifecycleCounter>();
 
-    general_tree<LifecycleCounter> gt("string0", 0);
+    general_tree<LifecycleCounter> gt;
+    gt.emplace_root("string0", 0);
     auto root = gt.root();
 
     // for building level by level

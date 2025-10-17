@@ -36,25 +36,13 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "root value construction (move)")
         CHECK_EQ(gt.root().data().get_int(), 100);
         CHECK_EQ(gt.root().data().get_string(), "string100");
         CHECK_EQ(LifecycleCounter::move_constructor_calls, 1);
-        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);        
+        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
     }
 
     SUBCASE("construction from temporary value triggers move")
     {
         general_tree<LifecycleCounter> gt(LifecycleCounter{});
         CHECK_EQ(LifecycleCounter::move_constructor_calls, 1);
-        CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
-    }
-}
-
-TEST_CASE_FIXTURE(LifecycleCounterFixture, "root value construction (emplacement)")
-{
-    SUBCASE("provided arguments construct the value in root with no copies")
-    {
-        general_tree<LifecycleCounter> gt("string123", 100);
-        CHECK_EQ(gt.root().data().get_string(), "string123");
-        CHECK_EQ(gt.root().data().get_int(), 100);
-        CHECK_EQ(LifecycleCounter::move_constructor_calls, 0);
         CHECK_EQ(LifecycleCounter::copy_constructor_calls, 0);
     }
 }
@@ -100,5 +88,5 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "move constructor")
         moved_from.clear();
         // new nodes destroyed successfully
         REQUIRE_EQ(LifecycleCounter::destructor_calls, 3);
-    }   
+    }
 }

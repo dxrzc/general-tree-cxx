@@ -7,7 +7,8 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "delete left child")
 {
     SUBCASE("delete left child and all the nodes hanging from it")
     {
-        general_tree<LifecycleCounter> gt("string1", 0);
+        general_tree<LifecycleCounter> gt;
+        gt.emplace_root("string1", 0);
         gt.emplace_left_child(gt.root(), "string2", 2);
         gt.emplace_left_child(gt.root().left_child(), "string3", 3);
         gt.emplace_left_child(gt.root().left_child().left_child(), "string5", 5);
@@ -21,7 +22,8 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "delete left child")
 
     SUBCASE("insert nodes after delete is safe and new nodes are correctly destroyed")
     {
-        general_tree<LifecycleCounter> gt("string1", 0);
+        general_tree<LifecycleCounter> gt;
+        gt.emplace_root("string1", 0);
         gt.emplace_left_child(gt.root(), "string2", 2);
         // delete
         gt.delete_left_child(gt.root());
@@ -80,7 +82,8 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "delete right sibling")
 {
     SUBCASE("delete right sibling and all the nodes hanging from it")
     {
-        general_tree<LifecycleCounter> gt("string1", 0);
+        general_tree<LifecycleCounter> gt;
+        gt.emplace_root("string1", 1);
         const auto child1 = gt.emplace_left_child(gt.root(), "string2", 2);
         // create and populate right sibling
         const auto right_sibling = gt.emplace_right_sibling(child1, "string3", 3);
@@ -96,7 +99,8 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "delete right sibling")
 
     SUBCASE("insert nodes after delete is safe and new nodes are correctly destroyed")
     {
-        general_tree<LifecycleCounter> gt("string1", 0);
+        general_tree<LifecycleCounter> gt;
+        gt.emplace_root("string1", 0);
         const auto child1 = gt.emplace_left_child(gt.root(), "string2", 2);
         gt.emplace_right_sibling(child1, "string3", 3);
 
