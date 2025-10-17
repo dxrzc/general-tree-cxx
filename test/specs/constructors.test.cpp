@@ -13,6 +13,80 @@ TEST_CASE("default constructor")
     }
 }
 
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "copy constructor")
+{
+    SUBCASE("no error if other tree is empty")
+    {
+        general_tree<int> empty_tree;
+        general_tree<int> gt(empty_tree);
+        REQUIRE(gt.empty());
+    }
+
+    SUBCASE("copy unbalanced tree")
+    {
+        general_tree<int> gt(0);
+        auto node = gt.root();
+        for (unsigned i = 0; i < 25; i++)
+            node = gt.insert_left_child(node, i + 1);
+
+        general_tree<int> new_tree(gt);
+        REQUIRE_EQ(new_tree, gt);
+    }
+
+    SUBCASE("copy tree with only one node")
+    {
+        general_tree<int> gt(1);
+        general_tree<int> new_tree(gt);
+        REQUIRE_EQ(new_tree.root().data(), 1);
+    }
+
+    SUBCASE("trees are equal after operation")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(11);
+        general_tree<LifecycleCounter> new_tree(gt);
+        REQUIRE_EQ(gt, new_tree);
+    }
+
+    SUBCASE("other tree is not modified")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(5);
+        auto backup = gt;
+
+        general_tree<LifecycleCounter> new_tree(gt);
+
+        REQUIRE_EQ(backup, gt);
+    }
+
+    SUBCASE("copy as many nodes as the original tree contains")
+    {
+        std::size_t org_tree_size = 4;
+        general_tree<LifecycleCounter> org_tree = seed_tree(org_tree_size);
+        general_tree<LifecycleCounter> new_tree(org_tree);
+        REQUIRE_EQ(LifecycleCounter::copy_constructor_calls, org_tree_size);
+    }
+
+    SUBCASE("all the copies nodes are destroyed successfully when clear is called")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(7);
+        general_tree<LifecycleCounter> new_tree(gt);
+        new_tree.clear();
+        REQUIRE_EQ(LifecycleCounter::destructor_calls, 7);
+    }
+
+    SUBCASE("inserting values after operation is safe")
+    {
+        std::size_t org_tree_size = 3;
+        general_tree<LifecycleCounter> gt = seed_tree(org_tree_size);
+        general_tree<LifecycleCounter> new_tree(gt);
+
+        new_tree.emplace_left_child(new_tree.root(), "string99", 99);
+        new_tree.emplace_left_child(new_tree.root().left_child(), "string100", 100);
+
+        new_tree.clear();
+        REQUIRE_EQ(LifecycleCounter::destructor_calls, org_tree_size + 2);
+    }
+}
+
 TEST_CASE_FIXTURE(LifecycleCounterFixture, "root value construction")
 {
     SUBCASE("create one copy of the provided value and store it in root")
@@ -67,7 +141,11 @@ TEST_CASE_FIXTURE(LifecycleCounterFixture, "move constructor")
 
     SUBCASE("left tree contains all the nodes of the right tree")
     {
-        // TODO: create an array based on an iteration type.
+        general_tree<LifecycleCounter> gt = seed_tree(5);
+        auto backup = gt;
+
+        auto gt2 = std::move(gt);
+        REQUIRE_EQ(backup, gt2);
     }
 
     SUBCASE("no error if the other tree is empty")
