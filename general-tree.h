@@ -280,12 +280,6 @@ public:
         m_root = new private_node(std::forward<U>(root_value));
     }
 
-    template <typename... Args>
-    general_tree(Args&&... args)
-    {
-        m_root = new private_node(std::forward<Args>(args)...);
-    }
-
     bool operator==(const general_tree<T>& other)
     {
         if (m_root == other.m_root)
