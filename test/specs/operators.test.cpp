@@ -1,6 +1,71 @@
 #include "doctest.h"
 #include "general-tree.h"
+#include "utils/fixtures/lifecycle-counter.fixture.h"
 #include "utils/helpers/seed-tree.h"
+
+TEST_CASE_FIXTURE(LifecycleCounterFixture, "assigment operator")
+{
+    SUBCASE("no error in self-assigning")
+    {
+        general_tree<int> gt(1);
+        gt = gt;
+        REQUIRE_EQ(gt.root().data(), 1);
+    }
+
+    SUBCASE("current tree should remain empty if other tree is empty")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(5);
+        general_tree<LifecycleCounter> other;
+
+        gt = other;
+
+        REQUIRE(gt.empty());
+    }
+
+    SUBCASE("should not modify the other tree")
+    {
+        general_tree<LifecycleCounter> other = seed_tree(10);
+        auto backup = other;
+
+        general_tree<LifecycleCounter> gt(LifecycleCounter("string0", 0));
+
+        gt = other;
+
+        REQUIRE_EQ(other, backup);
+    }
+
+    SUBCASE("create as many copies as elements the other tree contains")
+    {
+        const std::size_t gt_tree_size = 13;
+        general_tree<LifecycleCounter> gt = seed_tree(gt_tree_size);
+        general_tree<LifecycleCounter> new_tree(LifecycleCounter("string1", 1));
+
+        new_tree = gt;
+
+        REQUIRE_EQ(LifecycleCounter::copy_constructor_calls, gt_tree_size);
+    }
+
+    SUBCASE("previous elements should be destroyed")
+    {
+        std::size_t gt_size = 9;
+        general_tree<LifecycleCounter> gt = seed_tree(gt_size);
+        general_tree<LifecycleCounter> gt2;
+
+        gt = gt2;
+
+        REQUIRE_EQ(LifecycleCounter::destructor_calls, 9);
+    }
+
+    SUBCASE("trees should be equal after operation")
+    {
+        general_tree<LifecycleCounter> gt = seed_tree(13);
+        general_tree<LifecycleCounter> gt2(LifecycleCounter("string1", 1));
+
+        gt2 = gt;
+
+        REQUIRE_EQ(gt, gt2);
+    }
+}
 
 TEST_CASE_FIXTURE(LifecycleCounterFixture, "equality operator")
 {
