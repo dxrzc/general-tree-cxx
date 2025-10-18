@@ -330,6 +330,16 @@ public:
         m_root = new private_node(std::forward<U>(root_value));
     }
 
+    general_tree& operator=(const general_tree<T>& other)
+    {
+        if (this != &other)
+        {
+            clear();
+            deep_copy(other.root());
+        }
+        return *this;
+    }
+
     bool operator==(const general_tree<T>& other) const
     {
         if (m_root == other.m_root)
